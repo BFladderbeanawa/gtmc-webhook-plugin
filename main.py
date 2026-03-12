@@ -25,19 +25,24 @@ class GTMCWebhookPlugin(Star):
         await server.serve()
 
     async def send_to_qq(self, msg: str):
-        # 🔴 此处修改为你的目标 QQ 群号
-        target_group_id = "123456789" 
+        # 🔴 这里修改为需要推送到的 QQ 群或者频道，前面加上提供者和目标类型
+        # 在新版本 AstrBot 中，主动推消息的 target 格式一般是: <platform_id>|<group_id/user_id>
+        # 比如下面代表通过 NapCat（通常默认适配器名是 aiocqhttp 或者 qq） 发送到群 123456789
+        # 最不容易出错且兼容性最强的写法是使用 context.send_message(platform_name, ... )
+        
+        # 将此处替换为实际群号！！！
+        target_group = "123456789" 
         
         try:
-            # 遍历 AstrBot 已经连接的所有平台实例主动推消息 (兼容最新版本)
-            for adapter_id, bot_provider in self.ctx.bots.items():
-                if hasattr(bot_provider, "send_group_message"):
-                    from astrbot.api.message_components import Plain
-                    await bot_provider.send_group_message(target_group_id, [Plain(msg)])
-                elif hasattr(bot_provider, "api") and hasattr(bot_provider.api, "send_group_msg"):
-                    # 兼容 OneBot11 的原生调用
-                    await bot_provider.api.send_group_msg(group_id=int(target_group_id), message=msg)
-                    
+            from astrbot.api.message_components import Plain
+            
+            # 使用高层 API 直接向指定提供者的方法进行下发
+            # 如果你用的 NapCat / OneBot 协议，platform_name 通常是 'aiocqhttp' 或 'qq'
+            # 如果不确定 platform 名称，可以尝试直接调用
+            await self.ctx.send_message(
+                target=target_group, 
+                message=MessageChain().message(msg)
+            )
             self.context.logger.info("[GTMC Webhook] 成功向 QQ 群派发通知")
         except Exception as e:
             self.context.logger.error(f"[GTMC Webhook] 推送消息出错: {e}\n{traceback.format_exc()}")
