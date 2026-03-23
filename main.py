@@ -1,22 +1,20 @@
 import asyncio
-import dotenv
 import uvicorn
-import os
 from fastapi import FastAPI, Request
 from astrbot.api.all import Star, Context, register, MessageChain
 from astrbot.api.message_components import Plain
 from astrbot.core.platform.message_session import MessageSession
 from astrbot.core.platform.message_type import MessageType
 
-dotenv.load_dotenv()
 # 开启一个独立的 FastAPI 实例
 app = FastAPI()
 
 @register("gtmc_feature_webhook", "YourName", "GTMC Webhook 监听插件", "1.0.0")
 class GTMCWebhookPlugin(Star):
-    def __init__(self, context: Context) -> None:
+    def __init__(self, context: Context, config=None) -> None:
         super().__init__(context)
         self.ctx = context
+        self.config = config or {}
         # 将插件实例挂载到 app，以便 FastAPI 路由使用
         app.state.plugin = self 
         
@@ -24,13 +22,17 @@ class GTMCWebhookPlugin(Star):
         asyncio.create_task(self.start_server())
 
     async def start_server(self):
+        webhook_host = self.config.get("webhook_host", "0.0.0.0")
+        webhook_port = int(self.config.get("webhook_port", 8123))
         # 监听独立的 8123 端口，这专门用于你的前后端分离项目
-        config = uvicorn.Config(app, host="0.0.0.0", port=8123, log_level="warning")
+        config = uvicorn.Config(app, host=webhook_host, port=webhook_port, log_level="warning")
         server = uvicorn.Server(config)
         await server.serve()
 
     async def send_to_qq(self, msg: str):
-        target_group = os.environ.get("GROUPID", "")
+        target_group = str(self.config.get("target_group", "")).strip()
+        if not target_group:
+            return
         await self.ctx.send_message(
             session=MessageSession("aiocqhttp", MessageType.GROUP_MESSAGE, target_group), 
             message_chain=MessageChain([Plain(msg)])

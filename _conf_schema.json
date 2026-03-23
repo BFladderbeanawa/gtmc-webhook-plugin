@@ -1,0 +1,19 @@
+{
+  "target_group": {
+    "type": "string",
+    "description": "QQ target group id for sending webhook notifications",
+    "hint": "Set to the QQ group id that should receive GTMC feature alerts"
+  },
+  "webhook_host": {
+    "type": "string",
+    "description": "Webhook server host",
+    "default": "0.0.0.0",
+    "hint": "Use 0.0.0.0 to listen on all interfaces"
+  },
+  "webhook_port": {
+    "type": "int",
+    "description": "Webhook server port",
+    "default": 8123,
+    "hint": "Port exposed by this plugin's FastAPI webhook server"
+  }
+}
