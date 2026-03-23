@@ -31,10 +31,11 @@ class GTMCWebhookPlugin(Star):
 
     async def send_to_qq(self, msg: str):
         target_group = str(self.config.get("target_group", "")).strip()
-        if not target_group:
+        platform_name = str(self.config.get("platform_name", "")).strip()
+        if not target_group or not platform_name:
             return
         await self.ctx.send_message(
-            session=MessageSession("aiocqhttp", MessageType.GROUP_MESSAGE, target_group), 
+            session=MessageSession(platform_name, MessageType.GROUP_MESSAGE, target_group), 
             message_chain=MessageChain([Plain(msg)])
         )
 

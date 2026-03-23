@@ -15,5 +15,10 @@
     "description": "Webhook server port",
     "default": 8123,
     "hint": "Port exposed by this plugin's FastAPI webhook server"
+  },
+  "platform_name": {
+    "type": "string",
+    "description": "Platform name for message session",
+    "hint": "Set to the platform name used in MessageSession (e.g., aiocqhttp, go-cqhttp)"
   }
 }
