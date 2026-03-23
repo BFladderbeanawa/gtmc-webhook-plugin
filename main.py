@@ -1,7 +1,7 @@
 import asyncio
-import traceback
 import dotenv
 import uvicorn
+import os
 from fastapi import FastAPI, Request
 from astrbot.api.all import Star, Context, register, MessageChain
 from astrbot.api.message_components import Plain
@@ -30,7 +30,7 @@ class GTMCWebhookPlugin(Star):
         await server.serve()
 
     async def send_to_qq(self, msg: str):
-        target_group = "123456789" 
+        target_group = os.environ.get("GROUPID", "")
         await self.ctx.send_message(
             session=MessageSession("aiocqhttp", MessageType.GROUP_MESSAGE, target_group), 
             message_chain=MessageChain([Plain(msg)])
